@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: web-app-basic-auth
+  name: web-app-basic-auth
+  namespace: demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-app-basic-auth
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: web-app-basic-auth
+    spec:
+      containers:
+      - image: quay.io/rguske/web-app-basic-auth:v1
+        name: web-app-basic-auth
+        env:
+        - name: BASIC_AUTH_USER
+          valueFrom:
+            secretKeyRef:
+              name: web-app-basic-auth-secret
+              key: BASIC_AUTH_USER
+        - name: BASIC_AUTH_PASS
+          valueFrom:
+            secretKeyRef:
+              name: web-app-basic-auth-secret
+              key: BASIC_AUTH_PASS
+        - name: MESSAGE
+          value: 'Now using basic auth'
+        ports:
+        - containerPort: 8080
+        resources: {}
