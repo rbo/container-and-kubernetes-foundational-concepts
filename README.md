@@ -2,61 +2,101 @@
 
 ## Start KinD Cluster
 
-`kind create cluster --name kind1 --image kindest/node:v1.32.0@sha256:c48c62eac5da28cdadcf560d1d8616cfa6783b58f0d94cf63ad1bf49600cb027`
+```shell
+kind create cluster --name kind1 \
+  --image kindest/node:v1.32.0
+```
 
 ## Show Images
 
-`podman images`
+```shell
+podman images
+```
 
 ## Build Image
 
-`podman build -t quay.io/rguske/simple-web-app:v1 -f Containerfile`
+```shell
+podman build \
+  -t quay.io/rguske/simple-web-app:v1 \
+  -f Containerfile
+```
 
 ## Run Version 1
 
-`podman run -e PORT=8080 -it --rm -p 8080:8080 quay.io/rguske/simple-web-app:v1`
+```shell
+podman run -e PORT=8080 \
+  -it --rm -p 8080:8080 \
+  quay.io/rguske/simple-web-app:v1
+```
 
 ## Customize Version 1
 
-`podman run -e MESSAGE="Hi folks :)" -it --rm -p 8080:8080 quay.io/rguske/simple-web-app:v1`
+```shell
+podman run -e MESSAGE="Hi folks :)" \
+  -it --rm -p 8080:8080 \
+  quay.io/rguske/simple-web-app:v1
+```
 
 ## Create Version 2
 
-`podman build -t quay.io/rguske/simple-web-app:v2 -f Containerfile`
+```shell
+podman build \
+  -t quay.io/rguske/simple-web-app:v2 \
+  -f Containerfile
+```
 
 ## Run Version 2
 
-`podman run -e PORT=8080 -it --rm -p 8080:8080 quay.io/rguske/simple-web-app:v2`
+```shell
+podman run -e PORT=8080 \
+  -it --rm -p 8080:8080 \
+  quay.io/rguske/simple-web-app:v2
+```
 
 ## Push the image to Quay
 
-`podman login quay.io -u rguske`
+```shell
+podman login quay.io -u rguske
+```
 
-`podman push quay.io/rguske/simple-web-app:v1 quay.io/rguske/simple-web-app:v2`
+```shell
+podman push \
+  quay.io/rguske/simple-web-app:v1 \
+  quay.io/rguske/simple-web-app:v2
+```
 
 ## Run the app in K8s
 
-`oc create ns demo`
+```shell
+oc new-project demo
+oc create deployment simple-web-app \
+  --image=quay.io/rguske/simple-web-app:v1 
+  --port=8080 --replicas=2 \
+  --dry-run=client -oyaml > deploy.yaml
 
-`oc create deployment simple-web-app --image=quay.io/rguske/simple-web-app:v1 --namespace=demo --port=8080 --replicas=2 --dry-run=client -oyaml > deploy.yaml`
-
-`oc apply -f deploy.yaml`
+oc apply -f deploy.yaml
+```
 
 ## Expose App locally
 
-`oc port-forward deployment/simple-web-app 8080:8080 -n demo`
+```shell
+oc port-forward \
+  deployment/simple-web-app 8080:8080
+```
 
-// ## Use ENV Variables
-// 
-// ```yaml
-//         env:
-//         - name: MESSAGE
-//           value: 'HI THERE'
-// ```
-// 
-// Apply the changes:
-// 
-// `oc apply -f deploy.yaml`
+## Use ENV Variables
+
+```shell
+oc edit deployment simple-web-app
+```
+
+And add
+
+```yaml
+env:
+  - name: MESSAGE
+    value: 'HI THERE'
+```
 
 ## Use a ConfigMap to apply the ENV
 
@@ -82,7 +122,9 @@ Adjust the deployment file:
 
 ## Use Kubernetes Secrets to use Basic Auth
 
-`cd ../demo-app-basic-auth`
+```shell
+cd ../demo-app-basic-auth
+```
 
 Create the Kubernetes Secret:
 
@@ -118,4 +160,8 @@ Adjust the deployment file:
 
 Port forward the new app:
 
-`oc port-forward deployment/web-app-basic-auth 8080:8080 -n demo`
+```shell
+oc port-forward \
+  deployment/web-app-basic-auth \
+  8080:8080
+```
